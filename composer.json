@@ -2,10 +2,6 @@
   "name": "paigejulianne/voip-ms",
   "type": "library",
   "description": "An API for voip.ms services",
-  "keywords": [
-    "orm",
-    "lightweight"
-  ],
   "license": "MIT",
   "homepage": "https://github.com/paigejulianne/voip-ms",
   "authors": [
@@ -15,12 +11,13 @@
       "homepage": "https://paigejulianne.com/"
     }
   ],
+  "version": "0.1",
   "require": {
     "php": ">=7.4"
   },
   "autoload": {
     "psr-0": {
-      "PicoORM": "src/"
+      "VoipMs": "src/"
     }
   }
 }
