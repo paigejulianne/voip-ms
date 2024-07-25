@@ -3,7 +3,7 @@ error_reporting(E_ALL);
 
 $inc_start = microtime_float();
 // includes go here
-require_once 'includes/init.php';
+require_once 'src/VoipMs.php';
 $inc_end = microtime_float(); 
 
 
