@@ -13,7 +13,8 @@
   ],
   "version": "0.1",
   "require": {
-    "php": ">=7.4"
+    "php": ">=8.0",
+    "ext-curl": "*"
   },
   "autoload": {
     "psr-0": {
