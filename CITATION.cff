@@ -9,7 +9,7 @@ authors:
     family-names: Sullivan
     email: paige@paigejulianne.com
     orcid: 'https://orcid.org/0009-0002-7041-9547'
-repository-code: 'https://github.com/paigejulianne/voip-ms'
+repository-code: 'https://github.com/paigejulianne/voipms'
 abstract: >-
   voip-ms:  An API interface to voip.ms services
 keywords:

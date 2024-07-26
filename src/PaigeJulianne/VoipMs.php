@@ -1,23 +1,70 @@
 <?php
 /**
- * This class provides a generic PHP API to Voip.ms services
+ * Class VoipMs
+ *
+ * This class provides a wrapper for the VoIP.ms API.
  */
 
 namespace PaigeJulianne;
+use Exception;
+
+/**
+ * The VoipMs class provides a PHP interface for interacting with the VoIP.ms API.
+ *
+ * @package PaigeJulianne
+ */
 class VoipMs
 {
 
+    const API_URL = "https://voip.ms/api/v1/rest.php";
+    const INVOICE_RANGE_LAST_MONTH = 1;
+    const INVOICE_RANGE_LAST_TWO_MONTHS = 2;
+    const INVOICE_RANGE_LAST_THREE_MONTHS = 3;
+    const INVOICE_RANGE_CURRENT_MONTH = 4;
+    const INVOICE_RANGE_LAST_WEEK = 5;
+    const INVOICE_RANGE_CURRENT_WEEK = 6;
+    const INVOICE_TYPE_US = 0;
+    const INVOICE_TYPE_CA = 1;
+    const MUSIC_ON_HOLD_SORT_ALPHA = 'alpha';
+    const MUSIC_ON_HOLD_SORT_RANDOM = 'random';
+    const CALL_TYPE_ALL = 'all';
+    const CALL_TYPE_INCOMING = 'incoming';
+    const CALL_TYPE_OUTGOING = 'outgoing';
+    const BILLING_TYPE_PER_MINUTE = 1;
+    const BILLING_TYPE_FLAT = 2;
     protected string $apiUsername;
     protected string $apiPassword;
 
-    const API_URL = "https://voip.ms/api/v1/rest.php";
-
-    public function __construct($apiUsername, $apiPassword)
+    /**
+     * Class constructor
+     * @param string $apiUsername Your VOIP.MS API Username
+     * @param string $apiPassword Your VOIP.MS API Password (not your account password)
+     */
+    public function __construct(string $apiUsername, string $apiPassword)
     {
         $this->apiUsername = $apiUsername;
         $this->apiPassword = $apiPassword;
     }
 
+    /**
+     * @param int $memberId Specific Member ID (example: 6547)
+     * @param int $conferenceId Specific Conference ID (example: 234))
+     * @return string
+     * @throws Exception
+     */
+    public function addMemberToConference(int $memberId, int $conferenceId): string
+    {
+        $raw = $this->_doRequest('addMemberToConference', ["member" => $memberId, "conference" => $conferenceId]);
+        return $raw['member'];
+    }
+
+    /**
+     * Main request handler used by all methods
+     * @param string $method
+     * @param array  $parameters
+     * @return array
+     * @throws Exception
+     */
     private function _doRequest(string $method, array $parameters = array()): array
     {
         $curl = curl_init();
@@ -35,21 +82,16 @@ class VoipMs
         if ($rawData['status'] == 'success') {
             return $rawData;
         } else {
-            throw new \Exception($rawData['status']);
+            throw new Exception($rawData['status']);
         }
     }
 
     /**
-     * Voip.ms methods
+     * @param bool|null $getCallsStatistics fetch call statistics
+     * @return array
+     * @throws Exception
      */
-
-    public function addMemberToConference(int $memberId, int $conferenceId): string
-    {
-        $raw = $this->_doRequest('addMemberToConference', ["member" => $memberId, "conference" => $conferenceId]);
-        return $raw['member'];
-    }
-
-    public function getBalance(bool $getCallsStatistics = false): array
+    public function getBalance(?bool $getCallsStatistics): array
     {
         if ($getCallsStatistics) {
             $raw = $this->_doRequest('getBalance', ['advanced' => 'True']);
@@ -59,19 +101,36 @@ class VoipMs
         return $raw['balance'];
     }
 
-    public function getConference(int $conferenceId): array
+    /**
+     * @param int|null $conferenceId
+     * @return array
+     * @throws Exception
+     */
+    public function getConference(?int $conferenceId): array
     {
         $raw = $this->_doRequest('getConference', ['conference' => $conferenceId]);
         return $raw['conference'];
     }
 
-    public function getConferenceMembers(int $conferenceId): array
+    /**
+     * @param int|null $member
+     * @return array
+     * @throws Exception
+     */
+    public function getConferenceMembers(?int $member): array
     {
-        $raw = $this->_doRequest('getMembers', ['conference' => $conferenceId]);
+        $raw = $this->_doRequest('getMembers', ['member' => $member]);
         return $raw['members'];
     }
 
-    public function getConferenceRecordings(int $conferenceId, string $dateFrom = null, string $dateTo = null): array
+    /**
+     * @param int         $conferenceId
+     * @param string|null $dateFrom
+     * @param string|null $dateTo
+     * @return array
+     * @throws Exception
+     */
+    public function getConferenceRecordings(int $conferenceId, ?string $dateFrom, ?string $dateTo): array
     {
         if ($dateFrom || $dateTo) {
             $params = ["date_from" => $dateFrom, "date_to" => $dateTo];
@@ -80,13 +139,25 @@ class VoipMs
         return $raw['recordings'];
     }
 
-    public function getConferenceRecordingFile(int $conferenceId, string $recordingId): array
+    /**
+     * @param int    $conference
+     * @param string $recording
+     * @return array
+     * @throws Exception
+     */
+    public function getConferenceRecordingFile(int $conference, string $recording): array
     {
-        $raw = $this->_doRequest('getConferenceRecordingFile', ['conference' => $conferenceId, 'recording' => $recordingId]);
+        $raw = $this->_doRequest('getConferenceRecordingFile', ['conference' => $conference, 'recording' => $recording]);
         return $raw['recording'];
     }
 
-    public function getSequences(int $sequenceId, int $client = 0): array
+    /**
+     * @param int      $sequenceId
+     * @param int|null $client
+     * @return array
+     * @throws Exception
+     */
+    public function getSequences(int $sequenceId, ?int $client): array
     {
         if ($client) {
             $params = ['client' => $client];
@@ -95,36 +166,66 @@ class VoipMs
         return $raw['sequences'];
     }
 
-    public function getCountries(string $countryCode): string
+    /**
+     * @param string|null $country
+     * @return array
+     * @throws Exception
+     */
+    public function getCountries(?string $country): array
     {
-        $raw = $this->_doRequest('getCountries', ['country' => $countryCode]);
-        return $raw['countries'][0]['description'];
+        $raw = $this->_doRequest('getCountries', ['country' => $country]);
+        return $raw['countries'];
     }
 
-    public function getLanguages(string $languageCode): string
-    {
-        $raw = $this->_doRequest('getLanguages', ['language' => $languageCode]);
-        return $raw['languages'][0]['description'];
-    }
-
-    public function getLocales(string $localeCode): string
-    {
-        $raw = $this->_doRequest('getLocales', ['locale' => $localeCode]);
-        return $raw['locales'][0]['description'];
-    }
-
-    public function getServersInfo(int $serverId): array
-    {
-        $raw = $this->_doRequest('getServersInfo', ['server_pop' => $serverId]);
-        return $raw['servers'][0];
-    }
-
-    public function getIP(): string
-    {
+    /**
+     * @return string
+     * @throws Exception
+     */
+    public function getIP() : string {
         $raw = $this->_doRequest('getIP');
         return $raw['ip'];
     }
 
+    /**
+     * @param string|null $language
+     * @return array
+     * @throws Exception
+     */
+    public function getLanguages(?string $language): array
+    {
+        $raw = $this->_doRequest('getLanguages', ['language' => $language]);
+        return $raw['languages'];
+    }
+
+    /**
+     * @param string|null $locale
+     * @return array
+     * @throws Exception
+     */
+    public function getLocales(?string $locale): array
+    {
+        $raw = $this->_doRequest('getLocales', ['locale' => $locale]);
+        return $raw['locales'];
+    }
+
+    /**
+     * @param int|null $server_pop
+     * @return array
+     * @throws Exception
+     */
+    public function getServersInfo(?int $server_pop): array
+    {
+        $raw = $this->_doRequest('getServersInfo', ['server_pop' => $server_pop]);
+        return $raw['servers'];
+    }
+
+
+    /**
+     * @param string $dateFrom
+     * @param string $dateTo
+     * @return array
+     * @throws Exception
+     */
     public function getTransactionHistory(string $dateFrom, string $dateTo): array
     {
         $params = ["date_from" => $dateFrom, "date_to" => $dateTo];
@@ -132,21 +233,61 @@ class VoipMs
         return $raw['transactions'];
     }
 
-    public function createSubAccount(string $username, string $protocol, string $description, string $auth_type,
-                                     string $password, string $ip, string $device_type, string $callerid_number, string $canada_routing,
-                                     string $lock_international, bool $allow225, string $international_route, string $music_on_hold,
-                                     string $language, bool $record_calls, string $allowed_codecs, string $dtmf_mode, string $nat,
-                                     bool   $sip_traffic = false, int $max_expiry = 3600, int $rtp_timeout = 60,
-                                     int    $rtp_hold_timeout = 600, string $ip_restriction = NULL, bool $enable_ip_restriction = false,
-                                     string $pop_restriction = null, bool $enable_pop_restriction = false, bool $send_bye = true,
-                                     bool   $transcribe = false, string $transcription_locale = NULL, string $transcription_email = null,
-                                     int    $internal_extension = 0, int $internal_voicemail = 0, int $internal_dialtime = 0, int $reseller_client = 0,
-                                     int    $reseller_package = 0, string $reseller_nextbilling = NULL, bool $reseller_chargesetup = false,
-                                     int    $parking_lot = 0, int $transcription_start_delay = 0, bool $enable_internal_cnam = false, string $internal_cnam = ''): array
+    /**
+     * @param string      $username
+     * @param string      $protocol {@see VoipMS::getProtocols}
+     * @param string|null $description
+     * @param string      $auth_type
+     * @param string|null $password
+     * @param string      $ip
+     * @param string      $device_type
+     * @param string|null $callerid_number
+     * @param string|null $canada_routing
+     * @param string      $lock_international
+     * @param bool|null   $allow225
+     * @param string      $international_route
+     * @param string      $music_on_hold
+     * @param string      $language
+     * @param bool        $record_calls
+     * @param string      $allowed_codecs
+     * @param string      $dtmf_mode
+     * @param string      $nat
+     * @param bool        $sip_traffic
+     * @param int         $max_expiry
+     * @param int         $rtp_timeout
+     * @param int         $rtp_hold_timeout
+     * @param string|NULL $ip_restriction
+     * @param bool        $enable_ip_restriction
+     * @param string|null $pop_restriction
+     * @param bool        $enable_pop_restriction
+     * @param bool        $send_bye
+     * @param bool        $transcribe
+     * @param string|NULL $transcription_locale
+     * @param string|null $transcription_email
+     * @param int         $internal_extension
+     * @param int         $internal_voicemail
+     * @param int         $internal_dialtime
+     * @param int         $reseller_client
+     * @param int         $reseller_package
+     * @param string|NULL $reseller_nextbilling
+     * @param bool        $reseller_chargesetup
+     * @param int         $parking_lot
+     * @param int         $transcription_start_delay
+     * @param bool        $enable_internal_cnam
+     * @param string      $internal_cnam
+     * @return array
+     * @throws Exception
+     */
+
+    public function createSubAccount(string $username, string $protocol,
+                                     ?string $description, string $auth_type, ?string $password,
+                                     string $ip, string $device_type, ?string $callerid_number,
+                                     ?string $canada_routing, string $lock_international,
+                                     ?bool $allow225, string $international_route,
+                                     string $music_on_hold, string $language, bool $record_calls, string $allowed_codecs, string $dtmf_mode, string $nat, bool $sip_traffic = false, int $max_expiry = 3600, int $rtp_timeout = 60, int $rtp_hold_timeout = 600, string $ip_restriction = NULL, bool $enable_ip_restriction = false, string $pop_restriction = null, bool $enable_pop_restriction = false, bool $send_bye = true, bool $transcribe = false, string $transcription_locale = NULL, string $transcription_email = null, int $internal_extension = 0, int $internal_voicemail = 0, int $internal_dialtime = 0, int $reseller_client = 0, int $reseller_package = 0, string $reseller_nextbilling = NULL, bool $reseller_chargesetup = false, int $parking_lot = 0, int $transcription_start_delay = 0, bool $enable_internal_cnam = false, string $internal_cnam = ''): array
     {
 
-        foreach (get_defined_vars() as $var_name => $var_value)
-            $parameterArray[$var_name] = $var_value;
+        foreach (get_defined_vars() as $var_name => $var_value) $parameterArray[$var_name] = $var_value;
 
         $raw = $this->_doRequest('createSubAccount', $parameterArray);
         return ['id' => $raw['id'], 'account' => $raw['account']];
@@ -181,16 +322,6 @@ class VoipMs
         return $raw['dtmf_modes'];
     }
 
-    const INVOICE_RANGE_LAST_MONTH = 1;
-    const INVOICE_RANGE_LAST_TWO_MONTHS = 2;
-    const INVOICE_RANGE_LAST_THREE_MONTHS = 3;
-    const INVOICE_RANGE_CURRENT_MONTH = 4;
-    const INVOICE_RANGE_LAST_WEEK = 5;
-    const INVOICE_RANGE_CURRENT_WEEK = 6;
-
-    const INVOICE_TYPE_US = 0;
-    const INVOICE_TYPE_CA = 1;
-
     public function getInvoice(string $from, string $to, int $range = self::INVOICE_RANGE_LAST_MONTH, int $type = self::INVOICE_TYPE_US): string
     {
         $raw = $this->_doRequest('getInvoice', ['from' => $from, 'to' => $to, 'type' => $type]);
@@ -209,13 +340,9 @@ class VoipMs
         return $raw['music_on_hold'];
     }
 
-    const MUSIC_ON_HOLD_SORT_ALPHA = 'alpha';
-    const MUSIC_ON_HOLD_SORT_RANDOM = 'random';
-
     public function setMusicOnHold(string $name, string $description, ?bool $volume = false, ?string $sort = self::MUSIC_ON_HOLD_SORT_RANDOM, string $recordings): void
     {
-        foreach (get_defined_vars() as $var_name => $var_value)
-            $parameterArray[$var_name] = $var_value;
+        foreach (get_defined_vars() as $var_name => $var_value) $parameterArray[$var_name] = $var_value;
         $raw = $this->_doRequest('setMusicOnHold', $parameterArray);
     }
 
@@ -260,21 +387,10 @@ class VoipMs
         return $raw['accounts'];
     }
 
-    public function setSubAccount(string $id, string $description, string $auth_type,
-                                  string $password, string $ip, string $device_type, string $callerid_number, string $canada_routing,
-                                  string $lock_international, bool $allow225, string $international_route, string $music_on_hold,
-                                  string $language, bool $record_calls, string $allowed_codecs, string $dtmf_mode, string $nat,
-                                  bool   $sip_traffic = false, int $max_expiry = 3600, int $rtp_timeout = 60,
-                                  int    $rtp_hold_timeout = 600, string $ip_restriction = NULL, bool $enable_ip_restriction = false,
-                                  string $pop_restriction = '', bool $enable_pop_restriction = false, bool $send_bye = true,
-                                  bool   $transcribe = false, string $transcription_locale = NULL, string $transcription_email = null,
-                                  int    $internal_extension = 0, int $internal_voicemail = 0, int $internal_dialtime = 0, int $reseller_client = 0,
-                                  int    $reseller_package = 0, string $reseller_nextbilling = NULL, bool $reseller_chargesetup = false,
-                                  int    $parking_lot = 0, int $transcription_start_delay = 0, bool $enable_internal_cnam = false, string $internal_cnam = ''): void
+    public function setSubAccount(string $id, string $description, string $auth_type, string $password, string $ip, string $device_type, string $callerid_number, string $canada_routing, string $lock_international, bool $allow225, string $international_route, string $music_on_hold, string $language, bool $record_calls, string $allowed_codecs, string $dtmf_mode, string $nat, bool $sip_traffic = false, int $max_expiry = 3600, int $rtp_timeout = 60, int $rtp_hold_timeout = 600, string $ip_restriction = NULL, bool $enable_ip_restriction = false, string $pop_restriction = '', bool $enable_pop_restriction = false, bool $send_bye = true, bool $transcribe = false, string $transcription_locale = NULL, string $transcription_email = null, int $internal_extension = 0, int $internal_voicemail = 0, int $internal_dialtime = 0, int $reseller_client = 0, int $reseller_package = 0, string $reseller_nextbilling = NULL, bool $reseller_chargesetup = false, int $parking_lot = 0, int $transcription_start_delay = 0, bool $enable_internal_cnam = false, string $internal_cnam = ''): void
     {
 
-        foreach (get_defined_vars() as $var_name => $var_value)
-            $parameterArray[$var_name] = $var_value;
+        foreach (get_defined_vars() as $var_name => $var_value) $parameterArray[$var_name] = $var_value;
         $raw = $this->_doRequest('setSubAccount', $parameterArray);
     }
 
@@ -284,11 +400,9 @@ class VoipMs
         return $raw['call_hunting'];
     }
 
-    public function setCallParking(int    $callparking = 0, string $name, int $timeout, string $failover,
-                                   string $language, string $destination, int $delay, int $blf_lamps): int
+    public function setCallParking(int $callparking = 0, string $name, int $timeout, string $failover, string $language, string $destination, int $delay, int $blf_lamps): int
     {
-        foreach (get_defined_vars() as $var_name => $var_value)
-            $parameterArray[$var_name] = $var_value;
+        foreach (get_defined_vars() as $var_name => $var_value) $parameterArray[$var_name] = $var_value;
         if ($callparking == 0) unset($parameterArray['callparking']);
         $raw = $this->_doRequest('setCallParking', $parameterArray);
         return $raw['callparking'];
@@ -299,14 +413,9 @@ class VoipMs
         $raw = $this->_doRequest('delCallParking', ['callparking' => $callparking]);
     }
 
-    const CALL_TYPE_ALL = 'all';
-    const CALL_TYPE_INCOMING = 'incoming';
-    const CALL_TYPE_OUTGOING = 'outgoing';
-
     public function getCallRecordings(string $account, int $start, int $length, string $date_from, string $date_to, string $call_type = self::CALL_TYPE_ALL): array
     {
-        foreach (get_defined_vars() as $var_name => $var_value)
-            $parameterArray[$var_name] = $var_value;
+        foreach (get_defined_vars() as $var_name => $var_value) $parameterArray[$var_name] = $var_value;
         $raw = $this->_doRequest('getCallRecordings', $parameterArray);
         return $raw['recordings'];
     }
@@ -347,11 +456,9 @@ class VoipMs
         return $raw['call_types'];
     }
 
-    public function getCDR(string $date_from, string $date_to, bool $answered = true, bool $noanswer = true,
-                           bool   $busy = true, bool $failed = true, string $timezone, string $calltype, string $callbilling, string $account): array
+    public function getCDR(string $date_from, string $date_to, bool $answered = true, bool $noanswer = true, bool $busy = true, bool $failed = true, string $timezone, string $calltype, string $callbilling, string $account): array
     {
-        foreach (get_defined_vars() as $var_name => $var_value)
-            $parameterArray[$var_name] = $var_value;
+        foreach (get_defined_vars() as $var_name => $var_value) $parameterArray[$var_name] = $var_value;
         $raw = $this->_doRequest('getCDR', $parameterArray);
         return $raw['cdr'];
     }
@@ -368,27 +475,23 @@ class VoipMs
         return $raw['rates'];
     }
 
-    public function getResellerCDR(string $date_from, string $date_to, bool $answered = true, bool $noanswer = true,
-                                   bool   $busy = true, bool $failed = true, string $timezone, string $calltype, string $callbilling, string $account): array
+    public function getResellerCDR(string $date_from, string $date_to, bool $answered = true, bool $noanswer = true, bool $busy = true, bool $failed = true, string $timezone, string $calltype, string $callbilling, string $account): array
     {
-        foreach (get_defined_vars() as $var_name => $var_value)
-            $parameterArray[$var_name] = $var_value;
+        foreach (get_defined_vars() as $var_name => $var_value) $parameterArray[$var_name] = $var_value;
         $raw = $this->_doRequest('getResellerCDR', $parameterArray);
         return $raw['cdr'];
     }
 
     public function addCharge(string $client, string $charge, string $description, ?bool $testing = false): void
     {
-        foreach (get_defined_vars() as $var_name => $var_value)
-            $parameterArray[$var_name] = $var_value;
+        foreach (get_defined_vars() as $var_name => $var_value) $parameterArray[$var_name] = $var_value;
         $raw = $this->_doRequest('addCharge', $parameterArray);
     }
 
     public function addPayment(string $client, string $charge, string $description, ?bool $testing = false): void
     {
 
-        foreach (get_defined_vars() as $var_name => $var_value)
-            $parameterArray[$var_name] = $var_value;
+        foreach (get_defined_vars() as $var_name => $var_value) $parameterArray[$var_name] = $var_value;
 
         $raw = $this->_doRequest('addPayment', $parameterArray);
     }
@@ -447,14 +550,10 @@ class VoipMs
         return $raw['balance'];
     }
 
-    public function setClient(string  $client, string $email, string $password, ?string $company = null,
-                              string  $firstname, string $lastname, ?string $address = null, ?string $city = null,
-                              ?string $state = null, ?string $country = null, ?string $zip = null, string $phone_number,
-                              string  $balance_management): void
+    public function setClient(string $client, string $email, string $password, ?string $company = null, string $firstname, string $lastname, ?string $address = null, ?string $city = null, ?string $state = null, ?string $country = null, ?string $zip = null, string $phone_number, string $balance_management): void
     {
 
-        foreach (get_defined_vars() as $var_name => $var_value)
-            $parameterArray[$var_name] = $var_value;
+        foreach (get_defined_vars() as $var_name => $var_value) $parameterArray[$var_name] = $var_value;
 
         $raw = $this->_doRequest('setClient', $parameterArray);
     }
@@ -464,30 +563,18 @@ class VoipMs
         $raw = $this->_doRequest('setClientThreshold', ['client' => $client, 'threshold' => $threshold, 'email' => $email]);
     }
 
-    public function setConference(int     $conference, string $name, string $description, ?string $members,
-                                  int     $max_members, ?string $sound_join, ?string $sound_leave, ?string $sound_has_joined, ?string $sound_has_left,
-                                  ?string $sound_kicked, ?string $sound_muted, ?string $sound_unmuted, ?string $sound_only_person,
-                                  ?string $sound_only_one, ?string $sound_there_are, ?string $sound_other_in_party, ?string $sound_place_into_conference,
-                                  ?string $sound_get_pin, ?string $sound_invalid_pin, ?string $sound_locked, ?string $sound_locked_now,
-                                  ?string $sound_unlocked_now, ?string $sound_error_menu, ?string $sound_participants_muted,
-                                  ?string $sound_participants_unmuted, ?string $language): int
+    public function setConference(int $conference, string $name, string $description, ?string $members, int $max_members, ?string $sound_join, ?string $sound_leave, ?string $sound_has_joined, ?string $sound_has_left, ?string $sound_kicked, ?string $sound_muted, ?string $sound_unmuted, ?string $sound_only_person, ?string $sound_only_one, ?string $sound_there_are, ?string $sound_other_in_party, ?string $sound_place_into_conference, ?string $sound_get_pin, ?string $sound_invalid_pin, ?string $sound_locked, ?string $sound_locked_now, ?string $sound_unlocked_now, ?string $sound_error_menu, ?string $sound_participants_muted, ?string $sound_participants_unmuted, ?string $language): int
     {
 
-        foreach (get_defined_vars() as $var_name => $var_value)
-            $parameterArray[$var_name] = $var_value;
+        foreach (get_defined_vars() as $var_name => $var_value) $parameterArray[$var_name] = $var_value;
 
         $raw = $this->_doRequest('setConference', $parameterArray);
         return $raw['conference'];
     }
 
-    public function setConferenceMember(int     $conference, int $member, string $name,
-                                        ?string $description, ?int $pin, ?bool $announce_join_leave, ?bool $admin,
-                                        ?bool   $start_muted, ?bool $announce_user_count, ?bool $announce_only_user,
-                                        ?string $moh_when_empty, ?bool $quiet, ?string $announcement, ?bool $drop_silence,
-                                        ?int    $talking_threshold, ?int $silence_threshold, ?bool $talk_detection, ?bool $jitter_buffer): int
+    public function setConferenceMember(int $conference, int $member, string $name, ?string $description, ?int $pin, ?bool $announce_join_leave, ?bool $admin, ?bool $start_muted, ?bool $announce_user_count, ?bool $announce_only_user, ?string $moh_when_empty, ?bool $quiet, ?string $announcement, ?bool $drop_silence, ?int $talking_threshold, ?int $silence_threshold, ?bool $talk_detection, ?bool $jitter_buffer): int
     {
-        foreach (get_defined_vars() as $var_name => $var_value)
-            $parameterArray[$var_name] = $var_value;
+        foreach (get_defined_vars() as $var_name => $var_value) $parameterArray[$var_name] = $var_value;
 
         $raw = $this->_doRequest('setConferenceMember', $parameterArray);
         return $raw['member'];
@@ -495,28 +582,60 @@ class VoipMs
 
     public function setSequences(string $sequence, string $name, array $steps): int
     {
-        foreach (get_defined_vars() as $var_name => $var_value)
-            $parameterArray[$var_name] = $var_value;
+        foreach (get_defined_vars() as $var_name => $var_value) $parameterArray[$var_name] = $var_value;
 
         $raw = $this->_doRequest('setSequences', $parameterArray);
         return $raw['sequence'];
     }
 
-    public function signupClient(string $firstname, string $lastname, ?string $company,
-                                 string $address, string $city, string $state, string $country, string $zip,
-                                 string $phone_number, string $email, string $confirm_email, string $password,
-                                 string $confirm_password, ?bool $activate = true, ?string $balance_management): int
+    public function signupClient(string $firstname, string $lastname, ?string $company, string $address, string $city, string $state, string $country, string $zip, string $phone_number, string $email, string $confirm_email, string $password, string $confirm_password, ?bool $activate = true, ?string $balance_management): int
     {
-        foreach (get_defined_vars() as $var_name => $var_value)
-            $parameterArray[$var_name] = $var_value;
+        foreach (get_defined_vars() as $var_name => $var_value) $parameterArray[$var_name] = $var_value;
 
         $raw = $this->_doRequest('signupClient', $parameterArray);
         return $raw['client'];
     }
 
+    public function backOrderDIDUSA(int $quantity, string $state, string $ratecenter, string $routing, ?string $failover_busy, ?string $failover_unreachable, ?string $failover_noanswer, int $voicemail, string $pop, int $dialtime, bool $cnam, ?string $callerid_prefix, ?string $note, int $billing_type = self::BILLING_TYPE_PER_MINUTE, ?bool $test): void
+    {
+        foreach (get_defined_vars() as $var_name => $var_value) $parameterArray[$var_name] = $var_value;
+
+        $raw = $this->_doRequest('backOrderDIDUSA', $parameterArray);
+    }
+
+    public function backOrderDIDCAN(int $quantity, string $province, string $ratecenter, string $routing, ?string $failover_busy, ?string $failover_unreachable, ?string $failover_noanswer, int $voicemail, string $pop, int $dialtime, bool $cnam, ?string $callerid_prefix, ?string $note, int $billing_type = self::BILLING_TYPE_PER_MINUTE, ?bool $test): void
+    {
+        foreach (get_defined_vars() as $var_name => $var_value) $parameterArray[$var_name] = $var_value;
+
+        $raw = $this->_doRequest('backOrderDIDCAN', $parameterArray);
+    }
+
+    public function cancelDID(string $did, ?string $cancelcomment, ?bool $portout, ?bool $test): void
+    {
+        foreach (get_defined_vars() as $var_name => $var_value) $parameterArray[$var_name] = $var_value;
+
+        $raw = $this->_doRequest('cancelDID', $parameterArray);
+    }
+
+    public function connectDID(string $did, string $account, string $monthly, string $setup, string $minute, ?string $next_billing, ?bool $dont_charge_setup, ?bool $dont_charge_monthly): void
+    {
+        foreach (get_defined_vars() as $var_name => $var_value) $parameterArray[$var_name] = $var_value;
+
+        $raw = $this->_doRequest('connectDID', $parameterArray);
+    }
+
+    public function delCallback(int $callback): void
+    {
+        $raw = $this->_doRequest("delCallback", ['callback' => $callback]);
+    }
+
+    public function delCallerIDFiltering(int $filtering): void
+    {
+        $raw = $this->_doRequest("delCallback", ['filtering' => $filtering]);
+    }
+
 
 }
-
 
 
 
