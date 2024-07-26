@@ -1,0 +1,94 @@
+.tutorial-icon{
+    color:#FF0000;
+}
+
+.tutorial-icon-modal{
+    font-size: 24px;
+}
+
+.tutorial-icon-sidebar{
+    font-size: 16px;
+}
+
+.tutorial-title{
+    color:#555;
+    text-decoration:none;
+}
+
+.tutorial-title:hover{
+    color:#000;
+}
+
+#tutorial_title{
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: medium;
+}
+
+.tutorial-video{
+    display: flex;
+    justify-content: center;
+}
+
+.tutorial-close{
+    float: right;
+}
+
+.button-links{
+    display: flex;
+    justify-content: right;
+}
+
+#tutorialDialog .dialog{
+    width:750px;
+}
+
+.button-tutorial-internal {
+    position: absolute;
+    top: 10px;
+    right: 170px;
+}
+
+.tutorial-container-sidebar{
+    padding-bottom: 18px;
+}
+
+li.nav-item {
+    padding: 10px 10px 0px 10px;
+}
+
+ul.nav>li.nav-item>a {
+    color: #555;
+    text-decoration: none;
+}
+
+ul.nav>li.nav-item>a:hover {
+    color: #000;
+}
+
+.row.tutorial-video{
+    margin-top: auto;
+}
+
+.close-tut-modal{
+    padding: 0 6px !important;
+    border-radius: 1px !important;
+    font-family: Arial,Helvetica,sans-serif;
+    background-color: #dfdfdf;
+    border: 1px solid #555555;
+    color: #000000;
+}
+#tutorial_content{
+    padding:15px;
+}
+.leftmenubottomtdlineright>.button-wiki {
+    height: 0px!important;
+}
+
+.leftmenubottomtdlineright>.button-wiki>.tutorial-button-modal {
+    margin-bottom: 5px;
+}
+
+td.tutorial-td>a.tutorial-button-modal>img {
+    height: 20px;
+    padding-right: 5px;
+}

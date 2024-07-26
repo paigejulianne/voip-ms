@@ -1,0 +1,166 @@
+var current_chat_height = 0;
+
+function dragElement(elmnt, event_element) {
+    let pos1 = 0,
+        pos2 = 0,
+        pos3 = 0,
+        pos4 = 0;
+    if (document.getElementById(event_element)) {
+        /* if present, the header is where you move the DIV from:*/
+        document.getElementById(event_element).onmousedown = dragMouseDown;
+    } else {
+        /* otherwise, move the DIV from anywhere inside the DIV:*/
+        elmnt.onmousedown = dragMouseDown;
+    }
+
+    function dragMouseDown(e) {
+        $(".frameOverlay").show();
+        e = e || window.event;
+        e.preventDefault();
+        // get the mouse cursor position at startup:
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        // call a function whenever the cursor moves:
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // calculate the new cursor position:
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+
+        const height = window.innerHeight;
+        const width = window.innerWidth;
+
+        const chat_width = $('#chat-widget-container').width();
+        const chat_height = $('#chat-widget-container').height();
+
+        const new_top = elmnt.offsetTop - pos2;
+        const new_left = elmnt.offsetLeft - pos1;
+
+        current_chat_height = $('#chat-widget-container').height();
+
+        if (new_top >= 0 && new_top <= (height - chat_height) && new_left >= -16 && new_left <= (width - chat_width)) {
+            // set the element's new position:
+            elmnt.style.top = `${new_top}px`;
+            elmnt.style.left = `${new_left}px`;
+        }
+    }
+
+    function closeDragElement() {
+        /* stop moving when mouse button is released:*/
+        document.onmouseup = null;
+        document.onmousemove = null;
+        $(".frameOverlay").hide();
+    }
+}
+
+const onVisibilityChanged = ({
+    visibility
+}) => {
+    switch (visibility) {
+        case "maximized":
+            $("#chat-widget-container").addClass("open");
+            document.querySelector('#chat-widget-container').classList.remove('gdpr_visible');
+
+            $(".drag-top").css("display", "flex");
+            if (current_chat_height > 0) {
+                $('#chat-widget-container').height(current_chat_height);
+            }
+            setDragResizeEvents();
+            break;
+        case "minimized":
+            $("#chat-widget-container").removeClass("open");
+            $(".drag-top").hide();
+            $(document).off('mouseup').off('mousemove');
+            $('#resize_chat').off('mousedown');
+            gdprVisibilityChange();
+            break;
+        case "hidden":
+            break;
+    }
+}
+
+const arrow_vertical = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><!--! Font Awesome Pro 6.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M246.6 361.4C252.9 367.6 256 375.8 256 384s-3.125 16.38-9.375 22.62l-96 96c-12.5 12.5-32.75 12.5-45.25 0l-96-96c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L96 402.8v-293.5L54.63 150.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l96-96c12.5-12.5 32.75-12.5 45.25 0l96 96C252.9 111.6 256 119.8 256 128s-3.125 16.38-9.375 22.62c-12.5 12.5-32.75 12.5-45.25 0L160 109.3v293.5l41.38-41.38C213.9 348.9 234.1 348.9 246.6 361.4z"/></svg>`;
+const arrows = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Pro 6.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M512 255.1c0 8.188-3.125 16.41-9.375 22.66l-72 72C424.4 356.9 416.2 360 408 360c-18.28 0-32-14.95-32-32c0-8.188 3.125-16.38 9.375-22.62L402.8 288H288v114.8l17.38-17.38C311.6 379.1 319.8 376 328 376c18.28 0 32 14.95 32 32c0 8.188-3.125 16.38-9.375 22.62l-72 72C272.4 508.9 264.2 512 256 512s-16.38-3.125-22.62-9.375l-72-72C155.1 424.4 152 416.2 152 408c0-17.05 13.73-32 32-32c8.188 0 16.38 3.125 22.62 9.375L224 402.8V288H109.3l17.38 17.38C132.9 311.6 136 319.8 136 328c0 17.05-13.73 32-32 32c-8.188 0-16.38-3.125-22.62-9.375l-72-72C3.125 272.4 0 264.2 0 255.1s3.125-16.34 9.375-22.59l72-72C87.63 155.1 95.81 152 104 152c18.28 0 32 14.95 32 32c0 8.188-3.125 16.38-9.375 22.62L109.3 224H224V109.3L206.6 126.6C200.4 132.9 192.2 136 184 136c-18.28 0-32-14.95-32-32c0-8.188 3.125-16.38 9.375-22.62l72-72C239.6 3.125 247.8 0 256 0s16.38 3.125 22.62 9.375l72 72C356.9 87.63 360 95.81 360 104c0 17.05-13.73 32-32 32c-8.188 0-16.38-3.125-22.62-9.375L288 109.3V224h114.8l-17.38-17.38C379.1 200.4 376 192.2 376 184c0-17.05 13.73-32 32-32c8.188 0 16.38 3.125 22.62 9.375l72 72C508.9 239.6 512 247.8 512 255.1z"/></svg>`;
+
+const onReady = ({
+    state,
+    customerData
+}) => {
+    $('#chat-widget-container').prepend(
+        `<div class="frameOverlay"></div>
+        <div class="drag-top">
+            <div class="resize" id="resize_chat">${arrow_vertical}</div>
+            <div class="drag" id="drag_chat">${arrows}</div>
+        </div>`
+    );
+
+    if (state.visibility == "maximized") {
+        current_chat_height = $('#chat-widget-container').height();
+    }
+    onVisibilityChanged(state);
+    gdprVisibilityChange();
+}
+
+LiveChatWidget.on('ready', onReady);
+LiveChatWidget.on('visibility_changed', onVisibilityChanged);
+
+function setDragResizeEvents() {
+    dragElement(document.getElementById("chat-widget-container"), "drag_chat");
+
+    $('#resize_chat').on('mousedown', function (e) {
+        e.preventDefault();
+        $(".frameOverlay").show();
+        let pos2 = 0,
+            pos4 = 0;
+
+        pos4 = e.clientY;
+
+        const $dragable = $(this).parent().parent(),
+            startHeight = $dragable.height(),
+            pY = e.pageY;
+
+        $(document).on('mouseup', function (e) {
+            e.preventDefault();
+            $(".frameOverlay").hide();
+            $(document).off('mouseup').off('mousemove');
+        });
+
+        $(document).on('mousemove', function (me) {
+            me.preventDefault();
+
+            pos2 = pos4 - me.clientY;
+            pos4 = me.clientY;
+            const elmnt = document.getElementById("chat-widget-container");
+            const new_top = elmnt.offsetTop - pos2;
+            // const new_top = elmnt.offsetTop;
+
+            const my = (me.pageY - pY);
+            const current_height = startHeight - my;
+
+            const height = window.innerHeight;
+
+            if (current_height >= 200 && new_top >= 0 && current_height < height) {
+                current_chat_height = current_height;
+                $dragable.css({
+                    top: new_top,
+                    height: current_height,
+                });
+            }
+        });
+    });
+}
+
+function gdprVisibilityChange() {
+    if($('.gdpr').is(':visible')){
+        document.querySelector('#chat-widget-container').classList.add('gdpr_visible');
+    }else{
+        document.querySelector('#chat-widget-container').classList.remove('gdpr_visible');
+    }
+};

@@ -1,0 +1,78 @@
+#chat-widget-container.open {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  max-width: 445px !important;
+}
+
+#chat-widget-container.open .drag-bottom,
+#chat-widget-container.open .drag-top {
+  background-color: black !important;
+  border-radius: 3px 3px 0px 0px;
+  /* cursor: move; */
+  display: flex;
+  height: 25px;
+  margin: 0 16px;
+  z-index: inherit;
+}
+
+#chat-widget-container.open iframe {
+  margin-top: 5px !important;
+}
+
+#chat-widget-container.open .drag-top .resize,
+#chat-widget-container.open .drag-top .drag {
+  color: white;
+  z-index: inherit;
+  display: flex;
+}
+
+#chat-widget-container.open .drag-top .resize {
+  cursor: n-resize;
+}
+#chat-widget-container.open .drag-top .drag {
+  cursor: move;
+  width: 100%;
+}
+
+#chat-widget-container.open .drag-top .resize svg,
+#chat-widget-container.open .drag-top .drag svg {
+  height: 20px;
+  fill: white;
+  padding: 2px;
+}
+
+#chat-widget-container.open .drag-top .resize svg {
+  margin: auto 20px;
+}
+#chat-widget-container.open .drag-top .drag svg {
+  margin: auto 15px auto auto;
+}
+
+.frameOverlay
+{
+  height: 100%;
+  width: 100%;
+  background: transparent;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: none;
+  z-index: 10;
+}
+
+#chat-widget-container:not(.open) {
+  inset: auto 10px 0px auto !important;
+}
+
+@media screen and (max-width:485px){
+  #chat-widget-container:not(.open).gdpr_visible{
+    inset: calc(94% - 90px) 0px 0px calc(100% - 90px) !important;
+  }
+}
+
+@media screen and (min-width:486px){
+  #chat-widget-container:not(.open).gdpr_visible{
+    inset: calc(96% - 90px) 0px 0px calc(100% - 90px) !important;
+  }
+}

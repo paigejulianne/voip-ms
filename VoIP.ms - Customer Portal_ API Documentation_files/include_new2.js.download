@@ -1,0 +1,410 @@
+(function() {
+  var origOpen = XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open = function() {
+      this.addEventListener('load', function() {
+          // console.log('request completed!');
+          // console.log(this.readyState); //will always be 4 (ajax is completed successfully)
+          var response = "";
+          
+          if(typeof response.responseText != 'undefined')
+          {
+            var response = JSON.parse(this.responseText);
+            if(typeof response.redirect != 'undefined') {
+              // console.log(typeof response.redirect);
+              window.location = response.redirect;
+            }
+          }
+          
+         
+      });
+      origOpen.apply(this, arguments);
+  };
+})();
+
+
+function changeColor(color, ID) {
+document.getElementById(ID).bgColor = "#" + color;
+}
+function MM_preloadImages() { //v3.0
+  var d=document; if(d.images){ if(!d.MM_p) d.MM_p=new Array();
+    var i,j=d.MM_p.length,a=MM_preloadImages.arguments; for(i=0; i<a.length; i++)
+    if (a[i].indexOf("#")!=0){ d.MM_p[j]=new Image; d.MM_p[j++].src=a[i];}}
+}
+
+function MM_swapImgRestore() { //v3.0
+  var i,x,a=document.MM_sr; for(i=0;a&&i<a.length&&(x=a[i])&&x.oSrc;i++) x.src=x.oSrc;
+}
+
+function MM_findObj(n, d) { //v4.01
+  var p,i,x;  if(!d) d=document; if((p=n.indexOf("?"))>0&&parent.frames.length) {
+    d=parent.frames[n.substring(p+1)].document; n=n.substring(0,p);}
+  if(!(x=d[n])&&d.all) x=d.all[n]; for (i=0;!x&&i<d.forms.length;i++) x=d.forms[i][n];
+  for(i=0;!x&&d.layers&&i<d.layers.length;i++) x=MM_findObj(n,d.layers[i].document);
+  if(!x && d.getElementById) x=d.getElementById(n); return x;
+}
+
+function MM_swapImage() { //v3.0
+  var i,j=0,x,a=MM_swapImage.arguments; document.MM_sr=new Array; for(i=0;i<(a.length-2);i+=3)
+   if ((x=MM_findObj(a[i]))!=null){document.MM_sr[j++]=x; if(!x.oSrc) x.oSrc=x.src; x.src=a[i+2];}
+}
+
+function MM_showHideLayers() { //v6.0
+  var i,p,v,obj,args=MM_showHideLayers.arguments;
+  for (i=0; i<(args.length-2); i+=3) if ((obj=MM_findObj(args[i]))!=null) { v=args[i+2];
+    if (obj.style) { obj=obj.style; v=(v=='show')?'visible':(v=='hide')?'hidden':v; }
+    obj.visibility=v; }
+}
+
+
+//Main Menu
+var menu1=new Array()
+menu1[0]='<a class="portallink2" href="/m/">Portal Home</a>'
+menu1[1]='<a class="portallink2" href="/m/accountinfo.php">Account Information</a>'
+menu1[2]='<a class="portallink2" href="/m/settings.php">Account Settings</a>'
+menu1[3]='<a class="portallink2" href="/m/editinfo.php">Contact Information</a>'
+menu1[4]='<a class="portallink2" href="/m/api.php">SOAP and REST/JSON API</a>'
+menu1[5]='<a class="portallink2" href="/m/logout.php">Logout</a>'
+
+// DID management
+var menu2=new Array()
+menu2[0]='<a class="portallink2" href="/m/dids.php">Order DID(s)</a>'
+menu2[1]='<a class="portallink2" href="/m/managedid.php">Manage DID(s)</a>'
+menu2[2]='<a class="portallink2" href="/m/didbilling.php">DID Billing</a>'
+menu2[3]='<a class="portallink2" href="/m/didporting.php">DID Portability</a>'
+menu2[4]='<a class="portallink2" href="/m/voicemail.php">Voicemail</a>'
+menu2[5]='<a class="portallink2" href="/m/sms.php">SMS Message Center</a>'
+menu2[6]='<a class="portallink2" href="/m/fax/">Virtual Fax</a>'
+menu2[7]='<a class="portallink2" href="/m/ivr.php">Digital Receptionist (IVR)</a>'
+menu2[8]='<a class="portallink2" href="/m/queues.php">Calling Queues</a>'
+menu2[9]='<a class="portallink2" href="/m/recordings.php">Recordings</a>'
+menu2[10]='<a class="portallink2" href="/m/sipuri.php">SIP URI\'s</a>'
+menu2[11]='<a class="portallink2" href="/m/callforwarding.php">Call Forwarding</a>'
+menu2[12]='<a class="portallink2" href="/m/ringgroup.php">Ring Groups</a>'
+menu2[13]='<a class="portallink2" href="/m/callback.php">Callback</a>'
+menu2[14]='<a class="portallink2" href="/m/disa.php">DISA</a>'
+menu2[15]='<a class="portallink2" href="/m/timeconditions.php">Time Conditions</a>'
+menu2[16]='<a class="portallink2" href="/m/callerid_filtering.php">CallerID Filtering</a>'
+menu2[17]='<a class="portallink2" href="/m/phonebook.php">Phone Book</a>'
+menu2[18]='<a class="portallink2" href="/m/me911.php">e911</a>'
+
+//Sub Accounts
+var menu3=new Array()
+menu3[0]='<a class="portallink2" href="/m/subaccount.php">Create Sub Account</a>'
+menu3[1]='<a class="portallink2" href="/m/managesubaccount.php">Manage Sub Accounts</a>'
+menu3[2]='<a class="portallink2" href="/m/subreport.php">Sub Accounts Report</a>'
+menu3[3]='<a class="portallink2" href="/m/index.php">Sub Accounts Registrations</a>'
+
+
+// CDR Menu
+var menu4=new Array()
+menu4[0]='<a class="portallink2" href="/m/cdr.php">Call Detail Records</a>'
+menu4[1]='<a class="portallink2" href="/m/detailedcdr.php" target="_blank" rel="noopener noreferrer" >Printable CDR</a>'
+menu4[2]='<a class="portallink2" href="/m/cdrcsv.php">CSV/XLS/XML/SQL CDR</a>'
+menu4[3]='<a class="portallink2" href="/m/charts/showchart.php">Graphical Usage Report</a>'
+menu4[4]='<a class="portallink2" href="/m/subreport.php">Sub Accounts Report</a>'
+menu4[5]='<a class="portallink2" href="/m/statistics.php">Account Statistics</a>'
+
+// Finances
+var menu6=new Array()
+menu6[0]='<a class="portallink2" href="/m/balance.php">Account Balance</a>'
+menu6[1]='<a class="portallink2" href="/m/payment.php">Add Funds</a>'
+menu6[2]='<a class="portallink2" href="/m/transactions.php">Transactions History</a>'
+menu6[3]='<a class="portallink2" href="/m/invoicep.php">Generate Invoice</a>'
+menu6[4]='<a class="portallink2" href="/m/canadainvoicep.php">Canadian Invoice</a>'
+menu6[5]='<a class="portallink2" href="/m/didbilling.php">DID billing</a>'
+
+// Support
+var menu7=new Array()
+menu7[0]='<a class="portallink2" href="/m/hp/open.php">New Ticket</a>'
+menu7[1]='<a class="portallink2" href="/m/hp/tickets.php">View Tickets</a>'
+menu7[2]='<a class="portallink2" href="/m/samples.php">Configuration Samples</a>'
+menu7[3]='<a class="portallink2" href="/m/accountinfo.php">Account Information</a>'
+menu7[4]='<a class="portallink2" href="/m/features.php">Feature Requests</a>'
+menu7[5]='<a class="portallink2" href="http://wiki.voip.ms" target="wiki">VoIP.ms Wiki</a>'
+
+// Rates
+var menu8=new Array()
+menu8[0]='<a class="portallink2" href="/m/rates/rates.php">Check Rates online</a>'
+menu8[1]='<a class="portallink2" href="/m/rates/csv.php">CSV File Generator</a>'
+menu8[2]='<a class="portallink2" href="/m/rates/xls.php">Excel File Generator</a>'
+menu8[3]='<a class="portallink2" href="/m/rates/sql.php">SQL File Generator</a>'
+menu8[4]='<a class="portallink2" href="/m/rates/xml.php">XML Format</a>'
+
+// Rates
+var menu9=new Array()
+menu9[0]='<a class="portallink2" href="/m/reseller/main.php">Reseller Main</a>'
+menu9[1]='<a class="portallink2" href="/m/reseller/cli.php">Client Branding & Access</a>'
+menu9[2]='<a class="portallink2" href="/m/reseller/clients.php">Manage Client\'s Accounts</a>'
+menu9[3]='<a class="portallink2" href="/m/reseller/packages.php">Manage Rates & Packages</a>'
+menu9[4]='<a class="portallink2" href="/m/reseller/reports.php">Reports</a>'
+menu9[5]='<a class="portallink2" href="/m/api.php">SOAP and REST/JSON API</a>'
+
+
+var menuwidth='255px' //default menu width
+var menubgcolor='#666F6E'  //menu bgcolor
+var disappeardelay=250  //menu disappear speed onMouseout (in miliseconds)
+var hidemenu_onclick="yes" //hide menu when user clicks within menu?
+
+/////No further editting needed
+
+var ie4=document.all
+var ns6=document.getElementById && !document.all
+
+if (ie4||ns6) {
+  $(document).ready(function() {
+    $('body').prepend('<div id="dropmenudiv" style="visibility:hidden;width:'+menuwidth+';background-color:'+menubgcolor+'" onMouseover="clearhidemenu()" onMouseout="dynamichide(event)"></div>');
+  });
+}
+
+function getposOffset(what, offsettype){
+var totaloffset=(offsettype=="left")? what.offsetLeft : what.offsetTop;
+var parentEl=what.offsetParent;
+while (parentEl!=null){
+totaloffset=(offsettype=="left")? totaloffset+parentEl.offsetLeft : totaloffset+parentEl.offsetTop;
+parentEl=parentEl.offsetParent;
+}
+return totaloffset;
+}
+
+function showhide(obj, e, visible, hidden, menuwidth){
+if (ie4||ns6)
+dropmenuobj.style.left=dropmenuobj.style.top="-500px"
+if (menuwidth!=""){
+dropmenuobj.widthobj=dropmenuobj.style
+dropmenuobj.widthobj.width=menuwidth
+}
+if (e.type=="click" && obj.visibility==hidden || e.type=="mouseover")
+obj.visibility=visible
+else if (e.type=="click")
+obj.visibility=hidden
+}
+
+function iecompattest(){
+return (document.compatMode && document.compatMode!="BackCompat")? document.documentElement : document.body
+}
+
+function clearbrowseredge(obj, whichedge){
+var edgeoffset=0
+if (whichedge=="rightedge"){
+var windowedge=ie4 && !window.opera? iecompattest().scrollLeft+iecompattest().clientWidth-15 : window.pageXOffset+window.innerWidth-15
+dropmenuobj.contentmeasure=dropmenuobj.offsetWidth
+if (windowedge-dropmenuobj.x < dropmenuobj.contentmeasure)
+edgeoffset=dropmenuobj.contentmeasure-obj.offsetWidth
+}
+else{
+var topedge=ie4 && !window.opera? iecompattest().scrollTop : window.pageYOffset
+var windowedge=ie4 && !window.opera? iecompattest().scrollTop+iecompattest().clientHeight-15 :
+window.pageYOffset+window.innerHeight-18
+dropmenuobj.contentmeasure=dropmenuobj.offsetHeight
+if (windowedge-dropmenuobj.y < dropmenuobj.contentmeasure){ //move up?
+edgeoffset=dropmenuobj.contentmeasure+obj.offsetHeight
+if ((dropmenuobj.y-topedge)<dropmenuobj.contentmeasure) //up no good either?
+edgeoffset=dropmenuobj.y+obj.offsetHeight-topedge
+}
+}
+return edgeoffset
+}
+
+function populatemenu(what){
+if (ie4||ns6)
+dropmenuobj.innerHTML=what.join("")
+}
+
+
+function dropdownmenu(obj, e, menucontents, menuwidth){
+if (window.event) event.cancelBubble=true
+else if (e.stopPropagation) e.stopPropagation()
+clearhidemenu()
+dropmenuobj=document.getElementById? document.getElementById("dropmenudiv") : dropmenudiv
+populatemenu(menucontents)
+
+if (ie4||ns6){
+showhide(dropmenuobj.style, e, "visible", "hidden", menuwidth)
+
+dropmenuobj.x=getposOffset(obj, "left")
+dropmenuobj.y=getposOffset(obj, "top")
+dropmenuobj.style.left=dropmenuobj.x-clearbrowseredge(obj, "rightedge")+"px"
+dropmenuobj.style.top=dropmenuobj.y-clearbrowseredge(obj, "bottomedge")+obj.offsetHeight+"px"
+}
+
+return clickreturnvalue()
+}
+
+function clickreturnvalue(){
+if (ie4||ns6) return false
+else return true
+}
+
+function contains_ns6(a, b) {
+while (b.parentNode)
+if ((b = b.parentNode) == a)
+return true;
+return false;
+}
+
+function dynamichide(e){
+if (ie4&&!dropmenuobj.contains(e.toElement))
+delayhidemenu()
+else if (ns6&&e.currentTarget!= e.relatedTarget&& !contains_ns6(e.currentTarget, e.relatedTarget))
+delayhidemenu()
+}
+
+function hidemenu(e){
+if (typeof dropmenuobj!="undefined"){
+if (ie4||ns6)
+dropmenuobj.style.visibility="hidden"
+}
+}
+
+function delayhidemenu(){
+if (ie4||ns6)
+delayhide=setTimeout("hidemenu()",disappeardelay)
+}
+
+function clearhidemenu(){
+if (typeof delayhide!="undefined")
+clearTimeout(delayhide)
+}
+
+if (hidemenu_onclick=="yes"){
+document.onclick=hidemenu;
+}
+if($('select#col_state').length > 0){
+  (function( $ ) {
+    $.widget( "custom.combobox", {
+      _create: function() {
+        this.wrapper = $( "<span>" )
+          .addClass( "custom-combobox" )
+          .insertAfter( this.element );
+
+        this.element.hide();
+        this._createAutocomplete();
+        this._createShowAllButton();
+      },
+
+      _createAutocomplete: function() {
+        var selected = this.element.children( ":selected" ),
+          value = selected.val() ? selected.text() : "";
+
+        this.input = $( "<input>" )
+          .appendTo( this.wrapper )
+          .val( value )
+          .attr( "title", "" )
+          .addClass( "custom-combobox-input ui-widget ui-widget-content ui-state-default ui-corner-left" )
+          .autocomplete({
+            delay: 0,
+            minLength: 0,
+            source: $.proxy( this, "_source" )
+          })
+          .tooltip({
+            tooltipClass: "ui-state-highlight"
+          });
+
+        this._on( this.input, {
+          autocompleteselect: function( event, ui ) {
+            ui.item.option.selected = true;
+            this._trigger( "select", event, {
+              item: ui.item.option
+            });
+
+          },
+
+          autocompletechange: "_removeIfInvalid"
+        });
+      },
+
+      _createShowAllButton: function() {
+        var input = this.input,
+          wasOpen = false;
+
+        $( "<a>" )
+          .attr( "tabIndex", -1 )
+          .attr( "title", "Show All Items" )
+          .tooltip()
+          .appendTo( this.wrapper )
+          .button({
+            icons: {
+              primary: "ui-icon-triangle-1-s"
+            },
+            text: false
+          })
+          .removeClass( "ui-corner-all" )
+          .addClass( "custom-combobox-toggle ui-corner-right" )
+          .mousedown(function() {
+            wasOpen = input.autocomplete( "widget" ).is( ":visible" );
+          })
+          .click(function() {
+            input.focus();
+
+            // Close if already visible
+            if ( wasOpen ) {
+              return;
+            }
+
+            // Pass empty string as value to search for, displaying all results
+            input.autocomplete( "search", "" );
+          });
+      },
+
+      _source: function( request, response ) {
+        var matcher = new RegExp( $.ui.autocomplete.escapeRegex(request.term), "i" );
+        response( this.element.children( "option" ).map(function() {
+          var text = $( this ).text();
+          if ( this.value && ( !request.term || matcher.test(text) ) )
+            return {
+              label: text,
+              value: text,
+              option: this
+            };
+        }) );
+      },
+
+      _removeIfInvalid: function( event, ui ) {
+
+        // Selected an item, nothing to do
+        if ( ui.item ) {
+          return;
+        }
+
+        // Search for a match (case-insensitive)
+        var value = this.input.val(),
+          valueLowerCase = value.toLowerCase(),
+          valid = false;
+        this.element.children( "option" ).each(function() {
+          if ( $( this ).text().toLowerCase() === valueLowerCase ) {
+            this.selected = valid = true;
+            return false;
+          }
+        });
+
+        // Found a match, nothing to do
+        if ( valid ) {
+          return;
+        }
+
+        // Remove invalid value
+        this.input
+          .val( "" )
+          .attr( "title", value + " didn't match any item" )
+          .tooltip( "open" );
+        this.element.val( "" );
+        this._delay(function() {
+          this.input.tooltip( "close" ).attr( "title", "" );
+        }, 2500 );
+        this.input.autocomplete( "instance" ).term = "";
+      },
+
+      _destroy: function() {
+        this.wrapper.remove();
+        this.element.show();
+      }
+    });
+  })( jQuery );
+
+  $(function() {
+    if($( "select#col_state" ).length > 0){
+
+      $( "select#col_state" ).combobox();
+    }
+  });
+}

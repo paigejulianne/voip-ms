@@ -1,0 +1,28 @@
+$(document).ready(function(){
+    $('.tutorial-button-modal').click(function(e){
+        e.preventDefault();
+        var video_id = $(this).data('videoid');
+        var title = $(this).data('title');
+        loadVideo(video_id,title);
+        if($('#tutorialDialog').hasClass('dialog')){
+            $('#Mask').full().center().fadeIn();
+            $('#tutorialDialog').center().show();
+        }
+    });
+
+    $('.close-tut-modal').click((e)=>{
+        e.preventDefault();
+        $('#Mask').fadeOut();
+        $('#tutorialDialog').hide();
+        $('#tutorial_content').html('');
+    });
+
+    $('#tutorialDialog').on('hidden.bs.modal',function(e){
+        $('#tutorial_content').html('');
+    })
+});
+
+function loadVideo(video,title){
+    $('#tutorial_content').html(`<iframe width="720" height="405" src="https://www.youtube.com/embed/${video}?rel=0" title="YouTube video player" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`);
+    $('#tutorial_title').html(title);
+}
